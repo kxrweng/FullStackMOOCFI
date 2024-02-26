@@ -1,5 +1,8 @@
 import { useState } from 'react'
-
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
+   
 const App = () => {
   const anecdotes = [
     'If it hurts, do it more often.',
@@ -8,39 +11,48 @@ const App = () => {
     'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
     'Premature optimization is the root of all evil.',
     'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
-    'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when dianosing patients.',
+    'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.',
     'The only way to go fast, is to go well.'
   ]
-   
+  const [anecdoteVote, setVote] = useState({
+    0 : 0,
+    1 : 0,
+    2 : 0,
+    3 : 0,
+    4 : 0,
+    5 : 0,
+    6 : 0,
+    7 : 0,
+  })
+  const [maxVote, setMaxVote] = useState(0)
+  const [bestIndex,setIndex] = useState(0)
   const [selected, setSelected] = useState(0)
-  const [points, setPoints] = useState(new Array(8).fill(0))
-  const [mostPoints, setMostPoints] = useState(0)
-
-  const handleNextAnecdote = () => {
-    let random = Math.floor(Math.random() * 8)
-    console.log(random) 
-    setSelected(random)
+  const handleNext = () => {
+    let randomNum = Math.floor( (Math.random()) * 8)
+    setSelected(prevValue => randomNum)
   }
 
   const handleVote = () => {
-    const copy = [...points]
-    copy[selected] += 1
-    if (copy[selected] > copy[mostPoints]) {
-      setMostPoints(selected) 
+    setVote(prevObj => ({...prevObj, [selected] : prevObj[selected] + 1})
+    )
+    if(anecdoteVote[selected] > maxVote){
+      setMaxVote(prevValue => anecdoteVote[selected])
+      setIndex(prevValue => selected)
     }
-    setPoints(copy)
-  }
 
+  }
+  
   return (
     <div>
       <h1>Anecdote of the day</h1>
       <p>{anecdotes[selected]}</p>
-      <p>has {points[selected]} votes</p>
-      <button onClick= {() => handleVote()}>vote</button>
-      <button onClick={() => handleNextAnecdote()}>next anecdote</button>
+      <p>Has {anecdoteVote[selected]} votes</p>
+      <button onClick = {handleVote}>Vote</button>
+      <button onClick = {handleNext}>Next Anecdote</button>
+
       <h1>Anecdote with most votes</h1>
-      <p>{anecdotes[mostPoints]}</p>
-      <p>has {points[mostPoints]}</p>
+      <p>{anecdotes[bestIndex]}</p>
+      <p>has {anecdoteVote[bestIndex]} votes</p>
     </div>
   )
 }
