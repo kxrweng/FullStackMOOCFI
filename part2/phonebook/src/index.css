@@ -1,29 +1,23 @@
-h1 {
+.header{
+    background-color : lightgrey;
+    border-color : green;
     color : green;
-    font-style : italic;
-}
-.note {
-    color : grey;
-    padding-top : 3px;
-    font-size : 15px;
+    font-size : 20px;
+    border-style : solid;
+    border-radius : 5px;
+    padding : 10px;
+    margin-bottom : 10px;
+    flex : 1
 }
 
-.error {
+.header-error{
+    background-color : lightgrey;
+    border-color : red;
     color : red;
-    background : lightgrey;
     font-size : 20px;
     border-style : solid;
     border-radius : 5px;
     padding : 10px;
     margin-bottom : 10px;
-}
-
-.normal {
-    color : green;
-    background : lightgrey;
-    font-size : 20px;
-    border-style : solid;
-    border-radius : 5px;
-    padding : 10px;
-    margin-bottom : 10px;
+    flex : 1
 }

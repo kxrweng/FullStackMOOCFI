@@ -1,58 +1,91 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-   
+import { useState, useEffect } from 'react'
+import Note from './Components/Note'
+import Notification from './Components/Notification'
+import Footer from './Components/Footer'
+import noteService from './services/notes'
+
 const App = () => {
-  const anecdotes = [
-    'If it hurts, do it more often.',
-    'Adding manpower to a late software project makes it later!',
-    'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-    'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-    'Premature optimization is the root of all evil.',
-    'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
-    'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.',
-    'The only way to go fast, is to go well.'
-  ]
-  const [anecdoteVote, setVote] = useState({
-    0 : 0,
-    1 : 0,
-    2 : 0,
-    3 : 0,
-    4 : 0,
-    5 : 0,
-    6 : 0,
-    7 : 0,
-  })
-  const [maxVote, setMaxVote] = useState(0)
-  const [bestIndex,setIndex] = useState(0)
-  const [selected, setSelected] = useState(0)
-  const handleNext = () => {
-    let randomNum = Math.floor( (Math.random()) * 8)
-    setSelected(prevValue => randomNum)
-  }
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('')
+  const [showAll, setShowAll] = useState(true)
+  const [errorMessage, setErrorMessage] = useState(null)
 
-  const handleVote = () => {
-    setVote(prevObj => ({...prevObj, [selected] : prevObj[selected] + 1})
-    )
-    if(anecdoteVote[selected] > maxVote){
-      setMaxVote(prevValue => anecdoteVote[selected])
-      setIndex(prevValue => selected)
+  useEffect(() => {
+    noteService
+      .getAll()
+      .then(initialNotes => {
+        setNotes(initialNotes)
+      })
+  }, [])
+
+  const addNote = (event) => {
+    event.preventDefault()
+    const noteObject = {
+      content: newNote,
+      important: Math.random() > 0.5,
     }
-
-  }
   
+    noteService
+      .create(noteObject)
+        .then(returnedNote => {
+        setNotes(notes.concat(returnedNote))
+        setNewNote('')
+      })
+  }
+
+  const toggleImportanceOf = id => {
+    const note = notes.find(n => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+  
+    noteService
+      .update(id, changedNote)
+      .then(returnedNote => {
+      setNotes(notes.map(note => note.id !== id ? note : returnedNote))
+      })
+      .catch(error => {
+        setErrorMessage(
+          `Note '${note.content}' was already removed from server`
+        )
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
+  }
+
+  const handleNoteChange = (event) => {
+    setNewNote(event.target.value)
+  }
+
+  const notesToShow = showAll
+    ? notes
+    : notes.filter(note => note.important)
+
   return (
     <div>
-      <h1>Anecdote of the day</h1>
-      <p>{anecdotes[selected]}</p>
-      <p>Has {anecdoteVote[selected]} votes</p>
-      <button onClick = {handleVote}>Vote</button>
-      <button onClick = {handleNext}>Next Anecdote</button>
-
-      <h1>Anecdote with most votes</h1>
-      <p>{anecdotes[bestIndex]}</p>
-      <p>has {anecdoteVote[bestIndex]} votes</p>
+      <h1>Notes</h1>
+      <Notification message={errorMessage} />
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all' }
+        </button>
+      </div>      
+      <ul>
+        {notesToShow.map(note => 
+          <Note
+            key={note.id}
+            note={note}
+            toggleImportance={() => toggleImportanceOf(note.id)}
+          />
+        )}
+      </ul>
+      <form onSubmit={addNote}>
+      <input
+          value={newNote}
+          onChange={handleNoteChange}
+        />
+        <button type="submit">save</button>
+      </form>
+      <Footer />
     </div>
   )
 }
